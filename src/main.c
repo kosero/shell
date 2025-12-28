@@ -1,9 +1,11 @@
 #include "linenoise.h"
+#include "tokenize.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 #define PROMPT "$ "
 #define HISTORY_LENGTH 1024
+#define MAX_ARGS 1024
 
 int main(void) {
   if (!linenoiseHistorySetMaxLen(HISTORY_LENGTH)) {
@@ -12,8 +14,23 @@ int main(void) {
   }
 
   char *line;
+  char *args[MAX_ARGS];
   while ((line = linenoise(PROMPT)) != NULL) {
-    fprintf(stdout, "%s\n", line);
+    int args_read = s_read(line, args, MAX_ARGS);
+
+    fprintf(stdout, "Read %d args\n", args_read);
+    for (int i = 0; i < args_read; i++) {
+      fprintf(stdout, "arg[%d] = %s\n", i, args[i]);
+    }
+
+    // skip empty lines
+    if (args_read == 0) {
+      linenoiseFree(line);
+      continue;
+    }
+
+    // TODO: eval step
+
     linenoiseHistoryAdd(line);
     linenoiseFree(line);
   }
